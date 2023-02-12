@@ -2,9 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const prettier = require("prettier");
 
-const baseAliases = require("../../data/aliases/baseAliases.json");
-const gemojiAliases = require("../../data/aliases/gemojiAliases.json");
-const customAliases = require("../../data/aliases/customAliases.json");
+const baseAliases = {};
+const gemojiAliases = {};
+const customAliases = {};
 
 const OUTPUT_FILE_PATH = path.resolve("data", "aliases.js");
 
