@@ -9,7 +9,8 @@ import aliasRegex from "./aliasRegex";
 import normalizeProtocol from "./normalizeProtocol";
 import unicodeToCodepoint from "./unicodeToCodepoint";
 
-import aliases from "../data/aliases";
+//import aliases from "../data/aliases";
+const aliases = {};
 import asciiAliases from "../data/asciiAliases";
 
 const unicodeEmojiRegex = emojiRegex();
@@ -68,33 +69,34 @@ export function toArray(text, options = {}) {
   function replaceAliases(text) {
     const regex = aliasRegex();
     const textWithEmoji = [];
-    let match, pos = 0;
-
-    while (match = regex.exec(text)) {
-      const [edgeCase, asciiAlias, fullEmoji] = match.slice(1, 4);
-      // possible full emoji like :open_mouth:
-      const emoji = aliases[(asciiAlias + fullEmoji).slice(1, -1)];
-      if (match.index > pos) {
-        // text between matches
-        textWithEmoji.push(text.slice(pos, match.index));
-      }
-      if (edgeCase) {
-        // verbatim matched text
-        textWithEmoji.push(match[0]);
-      } else if (asciiAlias[0] === ":" && fullEmoji && emoji) {
-        // full emoji
-        textWithEmoji.push(emoji);
-      } else {
-        // ascii alias or ":"
-        textWithEmoji.push(asciiToAlias[asciiAlias]);
-        if (fullEmoji) {
-          // false positive, "go back" and don't skip that substring
-          regex.lastIndex -= fullEmoji.length;
+    let match;
+    let pos = 0;
+    if (match) {
+      while ((match = regex.exec(text))) {
+        const [edgeCase, asciiAlias, fullEmoji] = match.slice(1, 4);
+        // possible full emoji like :open_mouth:
+        const emoji = aliases[(asciiAlias + fullEmoji).slice(1, -1)];
+        if (match.index > pos) {
+          // text between matches
+          textWithEmoji.push(text.slice(pos, match.index));
         }
+        if (edgeCase) {
+          // verbatim matched text
+          textWithEmoji.push(match[0]);
+        } else if (asciiAlias[0] === ":" && fullEmoji && emoji) {
+          // full emoji
+          textWithEmoji.push(emoji);
+        } else {
+          // ascii alias or ":"
+          textWithEmoji.push(asciiToAlias[asciiAlias]);
+          if (fullEmoji) {
+            // false positive, "go back" and don't skip that substring
+            regex.lastIndex -= fullEmoji.length;
+          }
+        }
+        pos = regex.lastIndex;
       }
-      pos = regex.lastIndex;
     }
-
     // text after last match (if any)
     textWithEmoji.push(text.slice(pos));
     return textWithEmoji.join("");
